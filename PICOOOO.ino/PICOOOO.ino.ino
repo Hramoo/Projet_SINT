@@ -64,7 +64,7 @@ void setup () {
   //--- Configure ACAN2515
   Serial.println ("Configure ACAN2515") ;
   ACAN2515Settings settings (QUARTZ_FREQUENCY, 125UL * 1000UL) ; // CAN bit rate 125 kb/s
-  //settings.mRequestedMode = ACAN2515Settings::LoopBackMode ; // Select loopback mode
+  settings.mRequestedMode = ACAN2515Settings::NormalMode ; // Select loopback mode
   const uint16_t errorCode = can.begin (settings, [] { can.isr () ; }) ;
   if (errorCode == 0) {
     Serial.print ("Bit Rate prescaler: ") ;
@@ -101,47 +101,26 @@ static uint32_t gSentFrameCount = 0 ;
 
 //——————————————————————————————————————————————————————————————————————————————
 
-void loop() {
-    static uint32_t compteur = 0; 
-
-    //Serial.print("Message numéro : ");
-    //Serial.println(compteur);
-
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Blink LED
-    compteur++;
-
-
-    CANMessage messageEnvoye;
-    messageEnvoye.id = 0x123;  // ID du message CAN
-    messageEnvoye.len = 8;  // Taille du message (8 octets)
-    messageEnvoye.data[0] = 0x12;
-    messageEnvoye.data[1] = 0x34;
-    messageEnvoye.data[2] = 0x56;
-    messageEnvoye.data[3] = 0x78;
-    messageEnvoye.data[4] = 0x9A;
-    messageEnvoye.data[5] = 0xBC;
-    messageEnvoye.data[6] = 0xDE;
-    messageEnvoye.data[7] = 0xEF;
-    
-    if (can.tryToSend(messageEnvoye)) {
-        Serial.println("Message CAN envoyé !");
+void loop () {
+  CANMessage frame ;
+  if (gBlinkLedDate < millis ()) {
+    gBlinkLedDate += 2000 ;
+    digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN)) ;
+    const bool ok = can.tryToSend (frame) ;
+    if (ok) {
+      gSentFrameCount += 1 ;
+      Serial.print ("Sent: ") ;
+      Serial.println (gSentFrameCount) ;
     } else {
-        Serial.println("Erreur d'envoi du message CAN.");
+      Serial.println ("Send failure") ;
     }
-
-    // Vérifier et lire les messages CAN reçus
-    CANMessage messageRecu;
-    if (can.receive(messageRecu)) {
-        Serial.print("Message CAN reçu : ID = 0x");
-        Serial.print(messageRecu.id, HEX);
-        Serial.print(" Data : ");
-        for (uint8_t i = 0; i < messageRecu.len; i++) {
-            Serial.print(messageRecu.data[i], HEX);
-            Serial.print(" ");
-        }
-        Serial.println();
-    }
-
-    delay(1000);
+  }
+  if (can.available ()) {
+    can.receive (frame) ;
+    gReceivedFrameCount ++ ;
+    Serial.print ("Received: ") ;
+    Serial.println (gReceivedFrameCount) ;
+  }
 }
+
 //——————————————————————————————————————————————————————————————————————————————
