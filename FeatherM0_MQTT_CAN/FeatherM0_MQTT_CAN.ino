@@ -4,7 +4,10 @@
 
 #include <ACAN2515.h>
 #include <wiring_private.h>
+#include <LiquidCrystal.h>
 
+// LCD pins : RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(9, 8, 7, 6, 5, 4);
 #include <SPI.h>
 #include <WiFi101.h>
 #include <PubSubClient.h>
@@ -61,6 +64,11 @@ void setup () {
 //__________88SET UP MQTT DEBUT
   WiFi.setPins(8, 7, 4, 2);
   Serial.begin(115200);
+  lcd.begin(20, 4);
+  lcd.setCursor(0, 0);
+  lcd.print("Omar Montino");
+  lcd.setCursor(0, 1);
+  lcd.print("Topic : tructruc");
   while (!Serial) {
     ; // wait for serial port to connect
   }
@@ -149,24 +157,17 @@ void loop () {
 
   CANMessage frame ;
 
-  if (gBlinkLedDate < millis ()) {
-    gBlinkLedDate += 2000 ;
-    digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN)) ;
-    const bool ok = can.tryToSend (frame) ;
-    if (ok) {
-      gSentFrameCount += 1 ;
-      Serial.print ("Sent: ") ;
-      Serial.println (gSentFrameCount) ;
-    }else{
-      Serial.println ("Send failure") ;
-    }
-  }
   if (can.available ()) {
     can.receive (frame) ;
     gReceivedFrameCount ++ ;
     Serial.print ("Received: ") ;
     Serial.println (gReceivedFrameCount) ;
-    Serial.print(frame.data[0]);
+    Serial.println(frame.data[0]);
+    if (frame.data[0]==0){
+    client.publish("tructruc","0");
+    }else{
+    client.publish("tructruc","1");
+    }
   }
 }
 void callback(char* topic, byte* payload, unsigned int length) {

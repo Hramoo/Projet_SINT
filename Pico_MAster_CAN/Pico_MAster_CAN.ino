@@ -140,7 +140,6 @@ void loop () {
 CANMessage frame ;
 frame.id= 0x123;
 frame.len=1;
-frame.data[0]=1;
   //allumage LED
   digitalWrite(PIN_CS, LOW);
   SPI1.transfer(0x01);
@@ -153,24 +152,7 @@ frame.data[0]=1;
   digitalWrite(PIN_CS, HIGH);
  frame.data[0]=response;
  Serial.print(response);
- Serial.println ("LED allumé") ;
- //allumage LED
- delay(1000);
-  digitalWrite(PIN_CS, LOW);
-  SPI1.transfer(0x02);
-  digitalWrite(PIN_CS, HIGH);
-  delayMicroseconds(100); // court délai pour laisser la Basys traiter
-
-  // Étape 2 : lecture de la réponse
-  digitalWrite(PIN_CS, LOW);
-  response = SPI1.transfer(0x00);
-  digitalWrite(PIN_CS, HIGH);
- frame.data[0]=response;
- Serial.print(response);
- Serial.println ("LED éteinte") ;
-
-  
-  
+ Serial.println ("LED allumé") ;  
   if (gBlinkLedDate < millis ()) {
     gBlinkLedDate += 2000 ;
     digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN)) ;
@@ -189,9 +171,39 @@ frame.data[0]=1;
     Serial.print ("Received: ") ;
     Serial.println (gReceivedFrameCount) ;
   }
-  // Éteint la LED
-  sendSPICommand(0x02);
-  delay(3000);
+ //allumage LED
+ delay(1000);
+  digitalWrite(PIN_CS, LOW);
+  SPI1.transfer(0x02);
+  digitalWrite(PIN_CS, HIGH);
+  delayMicroseconds(100); // court délai pour laisser la Basys traiter
+  
+  // Étape 2 : lecture de la réponse
+  digitalWrite(PIN_CS, LOW);
+  response = SPI1.transfer(0x00);
+  digitalWrite(PIN_CS, HIGH);
+  frame.data[0]=response;
+  Serial.print(response);
+  Serial.println ("LED éteinte") ;
+    if (gBlinkLedDate < millis ()) {
+    gBlinkLedDate += 2000 ;
+    digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN)) ;
+    const bool ok = can.tryToSend (frame) ;
+    if (ok) {
+      gSentFrameCount += 1 ;
+      Serial.print ("Sent: ") ;
+      Serial.println (gSentFrameCount) ;
+    } else {
+      Serial.println ("Send failure") ;
+    }
+  }
+  if (can.available ()) {
+    can.receive (frame) ;
+    gReceivedFrameCount ++ ;
+    Serial.print ("Received: ") ;
+    Serial.println (gReceivedFrameCount) ;
+  }
+  delay(1000);
 }
 
 //——————————————————————————————————————————————————————————————————————————————
