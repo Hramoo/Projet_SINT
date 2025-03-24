@@ -60,7 +60,7 @@ void setup () {
 
 //__________88SET UP MQTT DEBUT
   WiFi.setPins(8, 7, 4, 2);
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial) {
     ; // wait for serial port to connect
   }
@@ -146,13 +146,9 @@ static uint32_t gSentFrameCount = 0 ;
 //——————————————————————————————————————————————————————————————————————————————
 
 void loop () {
-  if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
-  delay(1000);
-  client.publish("tructruc", "Salut bg");
+
   CANMessage frame ;
+
   if (gBlinkLedDate < millis ()) {
     gBlinkLedDate += 2000 ;
     digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN)) ;
@@ -170,6 +166,7 @@ void loop () {
     gReceivedFrameCount ++ ;
     Serial.print ("Received: ") ;
     Serial.println (gReceivedFrameCount) ;
+    Serial.print(frame.data[0]);
   }
 }
 void callback(char* topic, byte* payload, unsigned int length) {
