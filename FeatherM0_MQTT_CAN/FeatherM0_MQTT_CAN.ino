@@ -154,9 +154,7 @@ static uint32_t gSentFrameCount = 0 ;
 //——————————————————————————————————————————————————————————————————————————————
 
 void loop () {
-
   CANMessage frame ;
-
   if (can.available ()) {
     can.receive (frame) ;
     gReceivedFrameCount ++ ;
@@ -169,6 +167,7 @@ void loop () {
     client.publish("tructruc","1");
     }
   }
+  if callback(trucon)
 }
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
