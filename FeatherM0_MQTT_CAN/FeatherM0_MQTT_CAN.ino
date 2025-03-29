@@ -12,13 +12,15 @@ LiquidCrystal lcd(9, 8, 7, 6, 5, 4);
 #include <WiFi101.h>
 #include <PubSubClient.h>
 
-#define MQTT_BROKER "10.3.141.1"
+#define MQTT_BROKER "192.168.1.110"
 #define MQTT_PORT 1883
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
-char ssid[] = "raspi-webgui2";
-char pass[] = "ChangeMe";
+//char ssid[] = "raspi-webgui2";
+//char pass[] = "ChangeMe";
+char ssid[] = "Bbox-25CDE8E1";
+char pass[] = "Omar2002";
 int status = WL_IDLE_STATUS;
 
 //——————————————————————————————————————————————————————————————————————————————
@@ -155,29 +157,63 @@ static uint32_t gSentFrameCount = 0 ;
 
 void loop () {
   CANMessage frame ;
+  client.loop();
+
   if (can.available ()) {
     can.receive (frame) ;
     gReceivedFrameCount ++ ;
     Serial.print ("Received: ") ;
     Serial.println (gReceivedFrameCount) ;
     Serial.println(frame.data[0]);
+    
     if (frame.data[0]==0){
     client.publish("tructruc","0");
     }else{
     client.publish("tructruc","1");
     }
   }
-  if callback(trucon)
+
 }
 void callback(char* topic, byte* payload, unsigned int length) {
+  // Convertir le message payload en chaîne de caractères
+  char message[length + 1];  // +1 pour le caractère de fin de chaîne '\0'
+  for (int i = 0; i < length; i++) {
+    message[i] = (char)payload[i];
+  }
+  message[length] = '\0';  // Assurez-vous que la chaîne est terminée
+  CANMessage ordre ;
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+  Serial.println(message);
+
+  if (strcmp(message, "on") == 0) {
+   
+    ordre.id = 0x01;  // Id du message CAN (choisissez un id approprié)
+    ordre.len = 1;     // La longueur du message CAN
+    ordre.data[0] = 1; // Contenu du message CAN pour "on"
+
+  
+    if (can.tryToSend(ordre)) {
+      Serial.println("Message CAN 'on' envoyé");
+    } else {
+      Serial.println("Échec de l'envoi du message CAN");
+    }
+  }else if (strcmp(message, "off") == 0){
+        ordre.id = 0x01;  // Id du message CAN (choisissez un id approprié)
+    ordre.len = 1;     // La longueur du message CAN
+    ordre.data[0] = 0; // Contenu du message CAN pour "on"
+
+  
+    if (can.tryToSend(ordre)) {
+      Serial.println("Message CAN 'off' envoyé");
+    } else {
+      Serial.println("Échec de l'envoi du message CAN");
+    }
   }
-  Serial.println();
+  
 }
+
 
 void reconnect() {
   while (!client.connected()) {

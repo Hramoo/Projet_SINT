@@ -74,37 +74,32 @@ uint8_t sendSPICommand(uint8_t cmd) {
 // ------------------------- LOOP -------------------------
 void loop() {
   CANMessage frame;
-  frame.id = 0x123;
-  frame.len = 1;
-
-  // ---------- Allumer LED (commande 0x01) ----------
-  uint8_t response = sendSPICommand(0x01);
-  frame.data[0] = response;
-  Serial.print("Commande 0x01 → Réponse 0x");
-  Serial.println(response, HEX);
-  can.tryToSend(frame);
-
-  delay(1000);
-
-  // ---------- Éteindre LED (commande 0x02) ----------
-  response = sendSPICommand(0x02);
-  frame.data[0] = response;
-  Serial.print("Commande 0x02 → Réponse 0x");
-  Serial.println(response, HEX);
-  can.tryToSend(frame);
-
-  delay(1000);
-
-  // ---------- Blink LED embarquée + lecture CAN ----------
-  if (gBlinkLedDate < millis()) {
-    gBlinkLedDate = millis() + 1000;
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  }
-
+  
+  // Vérifiez si un message CAN est disponible
   if (can.available()) {
-    can.receive(frame);
+    can.receive(frame);  // Recevoir le message CAN
     gReceivedFrameCount++;
     Serial.print("CAN reçu #");
     Serial.println(gReceivedFrameCount);
+
+    // Vérifiez si le message CAN contient une commande 'on' (frame.data[0] == 1)
+    if (frame.data[0] == 1) {
+      // Commande "on" reçue, allumer la LED
+      uint8_t response = sendSPICommand(0x01); // Exemple de commande SPI pour allumer la LED
+      frame.data[0] = response;  // Réponse de la commande SPI
+      Serial.print("Commande 0x01 → Réponse 0x");
+      Serial.println(response, HEX);
+      can.tryToSend(frame);  // Envoyer la réponse via CAN
+    }
+    // Vérifiez si le message CAN contient une commande "off" (frame.data[0] == 0)
+    else if (frame.data[0] == 0) {
+      // Commande "off" reçue, éteindre la LED
+      Serial.println("Commande OFF reçue. Éteindre LED.");
+      
+      // Exemple de commande SPI pour éteindre la LED
+      uint8_t response = sendSPICommand(0x02);
+      frame.data[0] = response;  // Réponse de la commande SPI
+      can.tryToSend(frame);  // Envoyer la réponse via CAN
+    }
   }
 }
