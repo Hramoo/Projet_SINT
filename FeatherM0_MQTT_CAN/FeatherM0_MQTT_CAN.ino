@@ -18,13 +18,13 @@ LiquidCrystal lcd(9, 8, 7, 6, 5, 4);
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 //char ssid[] = "raspi-webgui2";
-//char pass[] = "ChangeMe";d
+//char pass[] = "ChangeMe";
 char ssid[] = "Bbox-25CDE8E1";
 char pass[] = "Omar2002";
 int status = WL_IDLE_STATUS;
 
 //——————————————————————————————————————————————————————————————————————————————
-//  MCP2515 connections: adapt theses settings to your design
+//  MCP2515 connections: aapt theses settings to your design
 //  This sketch is designed for an Adafruit Feather M0, using SERCOM1
 //  Standard Adafruit Feather M0 SPI pins are not used
 //    SCK input of MCP2515 is connected to pin #12
