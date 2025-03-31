@@ -18,7 +18,7 @@ LiquidCrystal lcd(9, 8, 7, 6, 5, 4);
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 //char ssid[] = "raspi-webgui2";
-//char pass[] = "ChangeMe";
+//char pass[] = "ChangeMe";d
 char ssid[] = "Bbox-25CDE8E1";
 char pass[] = "Omar2002";
 int status = WL_IDLE_STATUS;
