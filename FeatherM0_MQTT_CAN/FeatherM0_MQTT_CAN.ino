@@ -12,14 +12,14 @@ LiquidCrystal lcd(9, 8, 7, 6, 5, 4);
 #include <WiFi101.h>
 #include <PubSubClient.h>
 
-#define MQTT_BROKER "192.168.1.110"
+#define MQTT_BROKER "172.20.10.5"
 #define MQTT_PORT 1883
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 //char ssid[] = "raspi-webgui2";
 //char pass[] = "ChangeMe";
-char ssid[] = "Bbox-25CDE8E1";
+char ssid[] = "iPhoneOmar";
 char pass[] = "Omar2002";
 int status = WL_IDLE_STATUS;
 
@@ -187,7 +187,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("] ");
   Serial.println(message);
 
-  if (strcmp(message, "on") == 0) {
+  if (strcmp(message, "true") == 0) {
    
     ordre.id = 0x01;  // Id du message CAN (choisissez un id approprié)
     ordre.len = 1;     // La longueur du message CAN
@@ -199,7 +199,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     } else {
       Serial.println("Échec de l'envoi du message CAN");
     }
-  }else if (strcmp(message, "off") == 0){
+  }else if (strcmp(message, "false") == 0){
         ordre.id = 0x01;  // Id du message CAN (choisissez un id approprié)
     ordre.len = 1;     // La longueur du message CAN
     ordre.data[0] = 0; // Contenu du message CAN pour "on"

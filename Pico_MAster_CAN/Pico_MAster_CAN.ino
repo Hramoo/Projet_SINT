@@ -75,9 +75,8 @@ uint8_t sendSPICommand(uint8_t cmd) {
 void loop() {
   CANMessage frame;
   
-  // Vérifiez si un message CAN est disponible
   if (can.available()) {
-    can.receive(frame);  // Recevoir le message CAN
+    can.receive(frame);  
     gReceivedFrameCount++;
     Serial.print("CAN reçu #");
     Serial.println(gReceivedFrameCount);
